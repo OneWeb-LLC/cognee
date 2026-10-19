@@ -68,8 +68,8 @@ services:
       AUTH_TOKEN_COOKIE_SECURE: "true"
       AUTH_TOKEN_COOKIE_SAMESITE: none
       TELEMETRY_DISABLED: "1"
-      # Pilot hosts may block or slow OpenAI preflight probes; skip the probe only.
-      COGNEE_SKIP_CONNECTION_TEST: ${COGNEE_SKIP_CONNECTION_TEST:-true}
+      # fastembed's first-run model download can exceed the 30s probe budget.
+      COGNEE_SKIP_CONNECTION_TEST: "true"
     volumes:
       - cognee_system_v3:/cognee-storage/system
       - cognee_data:/cognee-storage/data
