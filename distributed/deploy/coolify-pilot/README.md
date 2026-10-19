@@ -42,3 +42,8 @@ curl -fsS "$COGNEE_BACKEND_URL/health"
 ```
 
 After UI deploy, sign in at `/local-login` with `default_user@example.com` and the configured password.
+
+### Coolify environment pitfalls
+
+- Do **not** add env rows whose value is `set VARIABLE_NAME` (a mistaken bulk import). Remove duplicates so each key appears once with a real secret.
+- If login fails after fixing env, bump the `postgres_data_*` / `cognee_system_*` volume suffixes in `docker-compose.yml` and redeploy so Postgres and the default user are re-initialized with the current `DEFAULT_USER_PASSWORD`.
