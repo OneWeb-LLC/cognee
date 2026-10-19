@@ -43,6 +43,9 @@ services:
       LLM_API_KEY: ${LLM_API_KEY}
       LLM_MODEL: ${LLM_MODEL:-openai/gpt-4o-mini}
       LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      # Local embeddings avoid OpenAI embed egress from the pilot host; LLM stays on OpenAI.
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-fastembed}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-small-en-v1.5}
       DB_PROVIDER: postgres
       DB_HOST: postgres
       DB_PORT: 5432
