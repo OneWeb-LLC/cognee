@@ -40,9 +40,11 @@ services:
       ENV: prod
       LOG_LEVEL: INFO
       HOST: 0.0.0.0
-      LLM_API_KEY: ${LLM_API_KEY}
+      # Optional: set LLM_API_KEY in Coolify for HYBRID recall; cognify uses GLiNER demo without it.
+      LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-openai/gpt-4o-mini}
       LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      GRAPH_EXTRACTOR: ${GRAPH_EXTRACTOR:-gliner_demo}
       # Local embeddings avoid OpenAI embed egress from the pilot host; LLM stays on OpenAI.
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-fastembed}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-small-en-v1.5}

@@ -20,7 +20,9 @@ Persistent API + Postgres on Coolify; Next.js UI on Vercel (`cognee-frontend`).
 | `DEFAULT_USER_PASSWORD` | Strong password for `default_user@example.com` (not `default_password`) |
 | `CORS_ALLOWED_ORIGINS` | Exact Vercel UI URL(s), comma-separated, e.g. `https://cognee.vercel.app` |
 
-Optional: `LLM_MODEL`, `LLM_PROVIDER`, `COGNEE_SKIP_CONNECTION_TEST=true` for dry runs without LLM.
+Optional: `LLM_MODEL`, `LLM_PROVIDER`, `GRAPH_EXTRACTOR` (`gliner_demo` default for keyless cognify).
+
+Pilot defaults: `GRAPH_EXTRACTOR=gliner_demo`, `EMBEDDING_PROVIDER=fastembed`, and `COGNEE_SKIP_CONNECTION_TEST=true` in compose so cognify works without OpenAI credits. Add a funded `LLM_API_KEY` when you want HYBRID recall completions.
 
 ## Vercel (UI)
 
