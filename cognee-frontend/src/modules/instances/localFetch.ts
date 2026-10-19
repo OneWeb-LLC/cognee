@@ -17,6 +17,9 @@ export default async function localFetch(url: URL | RequestInfo, options: Reques
     urlStr = `/${urlStr}`;
   }
   const localApiUrl = getLocalApiUrl();
+  if (!localApiUrl) {
+    throw new TypeError("Cognee backend URL is not configured.");
+  }
   const fullUrl = urlStr === "/health" || urlStr.startsWith("/health?")
     ? localApiUrl + urlStr
     : localApiUrl + "/api" + (/^\/v\d+(\/|\?|$)/.test(urlStr) ? urlStr : "/v1" + urlStr);

@@ -86,7 +86,7 @@ describe("readRuntimeConfig", () => {
   it("returns what the server rendered", () => {
     renderConfigElement(JSON.stringify({ backendUrl: "http://cognee:8000" }));
 
-    expect(readRuntimeConfig()).toEqual({ backendUrl: "http://cognee:8000" });
+    expect(readRuntimeConfig()).toEqual({ backendUrl: "http://cognee:8000", requireBackendUrl: false });
   });
 
   it("degrades to the caller's fallback rather than throwing on a corrupt payload", () => {
@@ -112,7 +112,7 @@ describe("readRuntimeConfig", () => {
   it("normalises a trailing slash coming out of the DOM", () => {
     renderConfigElement(JSON.stringify({ backendUrl: "http://cognee:8000/" }));
 
-    expect(readRuntimeConfig()).toEqual({ backendUrl: "http://cognee:8000" });
+    expect(readRuntimeConfig()).toEqual({ backendUrl: "http://cognee:8000", requireBackendUrl: false });
   });
 
   it("rebuilds the URL rather than passing the document's string through", () => {
@@ -120,13 +120,22 @@ describe("readRuntimeConfig", () => {
     // makes the value safe to put in an href.
     renderConfigElement(JSON.stringify({ backendUrl: "HTTPS://Cognee.Example.com:8443/api" }));
 
-    expect(readRuntimeConfig()).toEqual({ backendUrl: "https://cognee.example.com:8443/api" });
+    expect(readRuntimeConfig()).toEqual({
+      backendUrl: "https://cognee.example.com:8443/api",
+      requireBackendUrl: false,
+    });
   });
 
   it("drops query and fragment, which a backend base URL has no use for", () => {
     renderConfigElement(JSON.stringify({ backendUrl: "http://cognee:8000/?a=1#x" }));
 
-    expect(readRuntimeConfig()).toEqual({ backendUrl: "http://cognee:8000" });
+    expect(readRuntimeConfig()).toEqual({ backendUrl: "http://cognee:8000", requireBackendUrl: false });
+  });
+
+  it("preserves requireBackendUrl when no backend URL is published", () => {
+    renderConfigElement(JSON.stringify({ backendUrl: null, requireBackendUrl: true }));
+
+    expect(readRuntimeConfig()).toEqual({ requireBackendUrl: true });
   });
 });
 

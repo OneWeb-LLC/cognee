@@ -64,12 +64,25 @@ describe("collectRuntimeConfig", () => {
     delete process.env.COGNEE_BACKEND_URL;
     process.env.NEXT_PUBLIC_LOCAL_API_URL = "http://baked-in:8000";
 
-    expect(collectRuntimeConfig()).toEqual({ backendUrl: null });
+    expect(collectRuntimeConfig()).toEqual({ backendUrl: null, requireBackendUrl: false });
   });
 
   it("publishes the runtime URL when one is set", () => {
     process.env.COGNEE_BACKEND_URL = "https://cognee.example.com";
 
-    expect(collectRuntimeConfig()).toEqual({ backendUrl: "https://cognee.example.com" });
+    expect(collectRuntimeConfig()).toEqual({
+      backendUrl: "https://cognee.example.com",
+      requireBackendUrl: false,
+    });
+  });
+
+  it("publishes requireBackendUrl when COGNEE_REQUIRE_BACKEND_URL is true", () => {
+    delete process.env.COGNEE_BACKEND_URL;
+    process.env.COGNEE_REQUIRE_BACKEND_URL = "true";
+
+    expect(collectRuntimeConfig()).toEqual({
+      backendUrl: null,
+      requireBackendUrl: true,
+    });
   });
 });

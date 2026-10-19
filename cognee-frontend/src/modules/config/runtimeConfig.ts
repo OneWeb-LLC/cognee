@@ -22,6 +22,11 @@ export const RUNTIME_CONFIG_ELEMENT_ID = "cognee-runtime-config";
 export interface RuntimeConfig {
   /** Absolute origin of the cognee backend, without a trailing slash. */
   backendUrl: string | null;
+  /**
+   * When true, the UI must not guess a backend host (e.g. hostname:8000).
+   * Used for Vercel-hosted pilots where only COGNEE_BACKEND_URL is valid.
+   */
+  requireBackendUrl?: boolean;
 }
 
 /**
@@ -94,8 +99,12 @@ export function readRuntimeConfig(): Partial<RuntimeConfig> {
   // analysis can see the result is safe. Query and fragment are dropped; a
   // backend base URL has no use for them. Anything unusable degrades to the
   // caller's own fallback rather than throwing.
+  const requireBackendUrl = parsed.requireBackendUrl === true;
+
   const raw = parsed.backendUrl?.trim();
-  if (!raw) return {};
+  if (!raw) {
+    return requireBackendUrl ? { requireBackendUrl: true } : {};
+  }
 
   let url: URL;
   try {
@@ -105,12 +114,18 @@ export function readRuntimeConfig(): Partial<RuntimeConfig> {
   }
 
   if (url.protocol === "https:") {
-    return { backendUrl: stripTrailingSlash(`https://${url.host}${url.pathname}`) };
+    return {
+      backendUrl: stripTrailingSlash(`https://${url.host}${url.pathname}`),
+      requireBackendUrl,
+    };
   }
   if (url.protocol === "http:") {
-    return { backendUrl: stripTrailingSlash(`http://${url.host}${url.pathname}`) };
+    return {
+      backendUrl: stripTrailingSlash(`http://${url.host}${url.pathname}`),
+      requireBackendUrl,
+    };
   }
-  return {};
+  return requireBackendUrl ? { requireBackendUrl: true } : {};
 }
 
 /**

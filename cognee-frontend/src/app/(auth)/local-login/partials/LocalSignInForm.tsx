@@ -15,6 +15,15 @@ const DEFAULT_PASSWORD = "default_password";
 
 export default function LocalSignInForm() {
   const localApiUrl = getLocalApiUrl();
+  if (!localApiUrl) {
+    return (
+      <AuthCard>
+        <Text size="sm" className="!text-[#EDECEA]/85 !font-light !text-center">
+          Cognee backend is not configured for this deployment. Set COGNEE_BACKEND_URL on the UI host.
+        </Text>
+      </AuthCard>
+    );
+  }
   const [email, setEmail] = useState(DEFAULT_EMAIL);
   const [password, setPassword] = useState(DEFAULT_PASSWORD);
   const [error, setError] = useState<string | null>(null);

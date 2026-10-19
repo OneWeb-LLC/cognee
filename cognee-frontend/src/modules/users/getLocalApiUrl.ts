@@ -2,11 +2,16 @@ import { readRuntimeConfig, stripTrailingSlash } from "@/modules/config/runtimeC
 
 const DEFAULT_LOCAL_API_PORT = "8000";
 
-export function getLocalApiUrl(): string {
+export function getLocalApiUrl(): string | null {
   // Runtime config wins: it is the only source a published Docker image can
   // change, because NEXT_PUBLIC_* is frozen into the bundle at build time.
-  const runtimeUrl = readRuntimeConfig().backendUrl;
+  const runtime = readRuntimeConfig();
+  const runtimeUrl = runtime.backendUrl;
   if (runtimeUrl) return stripTrailingSlash(runtimeUrl);
+
+  if (runtime.requireBackendUrl) {
+    return null;
+  }
 
   const configuredUrl = process.env.NEXT_PUBLIC_LOCAL_API_URL;
   if (configuredUrl) return stripTrailingSlash(configuredUrl);
