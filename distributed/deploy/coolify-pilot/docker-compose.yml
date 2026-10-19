@@ -53,7 +53,7 @@ services:
       VECTOR_DB_HOST: postgres
       VECTOR_DB_PORT: 5432
       VECTOR_DB_USERNAME: cognee
-      VECTOR_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      VECTOR_DB_PASSWORD: ${VECTOR_DB_PASSWORD}
       VECTOR_DB_NAME: cognee_db
       GRAPH_DATABASE_PROVIDER: ladybug
       SYSTEM_ROOT_DIRECTORY: /cognee-storage/system
