@@ -39,5 +39,6 @@ export function getServerBackendUrl(): string {
 export function collectRuntimeConfig(): RuntimeConfig {
   return {
     backendUrl: normalizeBackendUrl(process.env.COGNEE_BACKEND_URL, BACKEND_URL_ENV),
+    requireBackendUrl: process.env.COGNEE_REQUIRE_BACKEND_URL?.toLowerCase() === "true",
   };
 }

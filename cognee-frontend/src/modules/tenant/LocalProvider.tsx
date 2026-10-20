@@ -53,9 +53,18 @@ export function LocalProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      const apiUrl = getLocalApiUrl();
+      if (!apiUrl) {
+        setError(
+          "Cognee backend is not configured for this deployment. Set COGNEE_BACKEND_URL on the UI host.",
+        );
+        setIsInitializing(false);
+        return;
+      }
+
       try {
         // Check if we're authenticated with the local backend
-        const meResponse = await global.fetch(`${localApiUrl}/api/v1/users/me`, {
+        const meResponse = await global.fetch(`${apiUrl}/api/v1/users/me`, {
           credentials: "include",
         });
 
@@ -78,7 +87,7 @@ export function LocalProvider({ children }: { children: React.ReactNode }) {
 
         // Network error — backend probably not running
         if (err instanceof TypeError) {
-          setError("Cannot connect to local Cognee backend at " + localApiUrl + ". Is it running?");
+          setError("Cannot connect to local Cognee backend at " + apiUrl + ". Is it running?");
         } else {
           const message = err instanceof Error ? err.message : "Failed to connect to local backend";
           setError(message);
@@ -113,7 +122,7 @@ export function LocalProvider({ children }: { children: React.ReactNode }) {
         tenant,
         cogniInstance: localInstance,
         localInstance,
-        serviceUrl: localApiUrl,
+        serviceUrl: localApiUrl ?? "",
         apiKey: "",
         isInitializing,
         tenantReady: true,
@@ -134,6 +143,7 @@ export function LocalProvider({ children }: { children: React.ReactNode }) {
 }
 
 function ErrorScreen({ message }: { message: string }) {
+  const isNotConfigured = message.includes("not configured");
   return (
     <div style={{
       display: "flex",
@@ -153,7 +163,7 @@ function ErrorScreen({ message }: { message: string }) {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
       }}>
         <h2 style={{ margin: "0 0 0.75rem", fontSize: "1.25rem", fontWeight: 700, color: tokens.textDark }}>
-          Connection Error
+          {isNotConfigured ? "Backend not configured" : "Connection Error"}
         </h2>
         <p style={{ margin: "0 0 1.5rem", fontSize: "0.875rem", color: tokens.textSecondary }}>
           {message}

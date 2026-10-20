@@ -1,0 +1,90 @@
+# ONE-207: Standalone Cognee API stack for Coolify (UI lives on Vercel).
+#
+# Deploy via Coolify dockercompose from OneWeb-LLC/cognee with:
+#   base_directory: distributed/deploy/coolify-pilot
+#   docker_compose_location: docker-compose.yml
+#
+# Required Coolify / server secrets (never commit values):
+#   LLM_API_KEY, DEFAULT_USER_PASSWORD, POSTGRES_PASSWORD,
+#   CORS_ALLOWED_ORIGINS (comma-separated Vercel UI origin(s))
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cognee
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: cognee_db
+    volumes:
+      # Bump suffix when rotating POSTGRES_PASSWORD on an existing deployment
+      # (Postgres initializes the password only on first volume creation).
+      - postgres_data_v4:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cognee -d cognee_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  cognee:
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    stop_grace_period: 15s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENV: prod
+      LOG_LEVEL: INFO
+      HOST: 0.0.0.0
+      # Optional: set LLM_API_KEY in Coolify for HYBRID recall; cognify uses GLiNER demo without it.
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-4o-mini}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      GRAPH_EXTRACTOR: ${GRAPH_EXTRACTOR:-gliner_demo}
+      # Local embeddings avoid OpenAI embed egress from the pilot host; LLM stays on OpenAI.
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-fastembed}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-small-en-v1.5}
+      DB_PROVIDER: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: cognee_db
+      DB_USERNAME: cognee
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      VECTOR_DB_PROVIDER: pgvector
+      VECTOR_DB_HOST: postgres
+      VECTOR_DB_PORT: 5432
+      VECTOR_DB_USERNAME: cognee
+      VECTOR_DB_PASSWORD: ${VECTOR_DB_PASSWORD}
+      VECTOR_DB_NAME: cognee_db
+      GRAPH_DATABASE_PROVIDER: ladybug
+      SYSTEM_ROOT_DIRECTORY: /cognee-storage/system
+      DATA_ROOT_DIRECTORY: /cognee-storage/data
+      ENABLE_BACKEND_ACCESS_CONTROL: "true"
+      REQUIRE_AUTHENTICATION: "true"
+      DEFAULT_USER_PASSWORD: ${DEFAULT_USER_PASSWORD}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      AUTH_TOKEN_COOKIE_SECURE: "true"
+      AUTH_TOKEN_COOKIE_SAMESITE: none
+      TELEMETRY_DISABLED: "1"
+      # fastembed's first-run model download can exceed the 30s probe budget.
+      COGNEE_SKIP_CONNECTION_TEST: "true"
+    volumes:
+      - cognee_system_v3:/cognee-storage/system
+      - cognee_data:/cognee-storage/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+volumes:
+  postgres_data_v4:
+  cognee_system_v3:
+  cognee_data:

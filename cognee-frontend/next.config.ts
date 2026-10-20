@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Emit .next/standalone: a self-contained server bundle with only the
-  // node_modules the app actually reaches. This is what the Docker runtime
-  // stage copies, and it is why the published image ships no dev dependencies.
-  output: "standalone",
+  // Emit .next/standalone for the frontend Docker image. Vercel's build tracer
+  // expects the default output layout when rootDirectory is cognee-frontend.
+  ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
   images: {
     remotePatterns: [{
       protocol: "https",

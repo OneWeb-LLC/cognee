@@ -7,11 +7,14 @@
 import { getLocalApiUrl } from "../getLocalApiUrl";
 import { RUNTIME_CONFIG_ELEMENT_ID } from "@/modules/config/runtimeConfig";
 
-function renderRuntimeConfig(backendUrl: string | null): void {
+function renderRuntimeConfig(
+  backendUrl: string | null,
+  extra: Record<string, unknown> = {},
+): void {
   const element = document.createElement("script");
   element.id = RUNTIME_CONFIG_ELEMENT_ID;
   element.type = "application/json";
-  element.textContent = JSON.stringify({ backendUrl });
+  element.textContent = JSON.stringify({ backendUrl, ...extra });
   document.head.appendChild(element);
 }
 
@@ -53,6 +56,12 @@ describe("getLocalApiUrl", () => {
     renderRuntimeConfig(null);
 
     expect(getLocalApiUrl()).toBe("https://baked-in.example.com");
+  });
+
+  it("returns null when the server requires a backend URL but none is set", () => {
+    renderRuntimeConfig(null, { requireBackendUrl: true });
+
+    expect(getLocalApiUrl()).toBeNull();
   });
 
   it("normalises trailing slashes from either source", () => {
